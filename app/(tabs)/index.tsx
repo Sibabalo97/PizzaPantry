@@ -1,98 +1,254 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View } from 'react-native';
+import tw from 'twrnc';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+// Import components
+import SignInScreen from '../screens/Auth/SignInScreen';
+import SignUpScreen from '../screens/Auth/SignUpScreen';
+import InventoryListScreen from '../screens/Inventory/InventoryListScreen';
+import ItemDetailScreen from '../screens/Inventory/ItemDetailScreen';
+import AddEditItemScreen from '../screens/Inventory/EditItemScreen';
+import AdjustQuantityScreen from '../screens/Inventory/AdjustStockScreen';
+import AnalyticsScreen from '../navigation/AnalyticsScreen';
+import OrdersScreen from '../navigation/OrdersScreen';
+import SettingsScreen from '../navigation/SettingsScreen';
+import TabBar from '../../components/icons/TabBar';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+// Import types and data
+import { User } from '../types/User';
+import { Item } from '../types/Item';
+import { USERS } from '../data/mockUsers';
+import { mockItems } from '../data/mockItems';
+import { mockLogs } from '../data/mockLogs';
+import { mockOrders } from '../data/mockOrders';
+
+const MobileApp: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [screen, setScreen] = useState<'signin' | 'signup' | 'list' | 'detail' | 'add' | 'edit' | 'adjust'>('signin');
+  const [activeTab, setActiveTab] = useState('inventory');
+  
+  // Create mutable copies of the mock data
+  const [items, setItems] = useState<Item[]>([...mockItems]);
+  const [allLogs, setAllLogs] = useState([...mockLogs]);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const logs = allLogs.filter(log => log.itemId === selectedItem?.id).slice(0, 10);
+
+  const handleSignIn = (email: string, password: string) => {
+    const foundUser = USERS.find(u => u.email === email && u.password === password);
+    if (foundUser) {
+      setUser(foundUser);
+      setScreen('list');
+    }
+  };
+
+  const handleSignUp = (email: string, password: string, name: string) => {
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      email,
+      name,
+      password
+    };
+    USERS.push(newUser);
+    setUser(newUser);
+    setScreen('list');
+  };
+
+  const handleSignOut = () => {
+    setUser(null);
+    setScreen('signin');
+    setSelectedItem(null);
+  };
+
+  const handleAddItem = (itemData: Omit<Item, 'id' | 'lastUpdated'>) => {
+    const newItem: Item = {
+      ...itemData,
+      id: crypto.randomUUID(),
+      lastUpdated: new Date().toISOString()
+    };
+    const updatedItems = [...items, newItem];
+    setItems(updatedItems);
+    setScreen('list');
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleEditItem = (itemData: Omit<Item, 'id' | 'lastUpdated'>) => {
+    if (!selectedItem) return;
+    
+    const updatedItems = items.map(item => 
+      item.id === selectedItem.id 
+        ? {
+            ...item,
+            ...itemData,
+            lastUpdated: new Date().toISOString()
+          }
+        : item
+    );
+    
+    setItems(updatedItems);
+    setSelectedItem(updatedItems.find(item => item.id === selectedItem.id) || null);
+    setScreen('detail');
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleDeleteItem = () => {
+    if (!selectedItem) return;
+    
+    const updatedItems = items.filter(i => i.id !== selectedItem.id);
+    const updatedLogs = allLogs.filter(log => log.itemId !== selectedItem.id);
+    
+    setItems(updatedItems);
+    setAllLogs(updatedLogs);
+    setScreen('list');
+    setSelectedItem(null);
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleAdjustQuantity = (type: 'add' | 'remove', amount: number, reason: string) => {
+    if (!selectedItem || !user) return;
+
+    const updatedItems = items.map(item => {
+      if (item.id === selectedItem.id) {
+        const newQuantity = type === 'add' 
+          ? item.quantity + amount
+          : item.quantity - amount;
+
+        return {
+          ...item,
+          quantity: newQuantity,
+          lastUpdated: new Date().toISOString()
+        };
+      }
+      return item;
+    });
+
+    const newLog = {
+      id: crypto.randomUUID(),
+      itemId: selectedItem.id,
+      type,
+      amount,
+      reason,
+      timestamp: new Date().toISOString(),
+      user: user.name
+    };
+
+    const updatedLogs = [newLog, ...allLogs];
+
+    setItems(updatedItems);
+    setAllLogs(updatedLogs);
+    setSelectedItem(updatedItems.find(item => item.id === selectedItem.id) || null);
+    setScreen('detail');
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleRefresh = () => {
+    setItems([...items]);
+    setRefreshKey(prev => prev + 1);
+  };
+
+  // Render different screens based on navigation state
+  const renderMainContent = () => {
+    if (screen === 'detail' && selectedItem) {
+      return (
+        <ItemDetailScreen
+          item={selectedItem}
+          logs={logs}
+          onBack={() => setScreen('list')}
+          onEdit={() => setScreen('edit')}
+          onDelete={handleDeleteItem}
+          onAdjust={() => setScreen('adjust')}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+      );
+    }
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    if (screen === 'add') {
+      return (
+        <AddEditItemScreen
+          onBack={() => setScreen('list')}
+          onSave={handleAddItem}
+        />
+      );
+    }
+
+    if (screen === 'edit' && selectedItem) {
+      return (
+        <AddEditItemScreen
+          item={selectedItem}
+          onBack={() => setScreen('detail')}
+          onSave={handleEditItem}
+        />
+      );
+    }
+
+    if (screen === 'adjust' && selectedItem && user) {
+      return (
+        <AdjustQuantityScreen
+          item={selectedItem}
+          user={user}
+          onBack={() => setScreen('detail')}
+          onSave={handleAdjustQuantity}
+        />
+      );
+    }
+
+    // Tab-based screens
+    switch (activeTab) {
+      case 'analytics':
+        return <AnalyticsScreen items={items} onBack={() => setActiveTab('inventory')} />;
+      
+      case 'orders':
+        return <OrdersScreen orders={mockOrders} onBack={() => setActiveTab('inventory')} />;
+      
+      case 'settings':
+        return <SettingsScreen user={user!} onSignOut={handleSignOut} onBack={() => setActiveTab('inventory')} />;
+      
+      case 'inventory':
+      default:
+        return (
+          <InventoryListScreen
+            user={user!}
+            items={items}
+            onSelectItem={(item) => {
+              setSelectedItem(item);
+              setScreen('detail');
+            }}
+            onAddItem={() => setScreen('add')}
+            onSignOut={handleSignOut}
+            onRefresh={handleRefresh}
+          />
+        );
+    }
+  };
+
+  if (!user) {
+    if (screen === 'signup') {
+      return (
+        <SignUpScreen
+          onSignUp={handleSignUp}
+          onNavigateToSignIn={() => setScreen('signin')}
+        />
+      );
+    }
+    return (
+      <SignInScreen
+        onSignIn={handleSignIn}
+        onNavigateToSignUp={() => setScreen('signup')}
+      />
+    );
+  }
+
+  // Show tab bar only on main screens (not detail/edit/add screens)
+  const showTabBar = ['list', 'detail', 'add', 'edit', 'adjust'].includes(screen) && activeTab === 'inventory';
+
+  return (
+    <View style={tw`flex-1 bg-white`}>
+      {renderMainContent()}
+      {showTabBar && (
+        <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      )}
+    </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default MobileApp;
