@@ -2,15 +2,16 @@ import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import tw from 'twrnc';
-import { Item } from '../types/Item';
-import { mockLogs } from '../data/mockLogs';
+import {  AdjustmentLog } from '../types/AdjustmentLog';
+import { Item} from '../types/Item';
 
 interface AnalyticsScreenProps {
   items: Item[];
+  logs: AdjustmentLog[];
   onBack: () => void;
 }
 
-const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({ items, onBack }) => {
+const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({ items, logs, onBack }) => {
   const lowStockCount = items.filter(item => item.quantity <= item.reorderPoint).length;
   const totalItems = items.length;
   const totalValue = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -60,8 +61,10 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({ items, onBack }) => {
                 <View style={tw`flex-row items-center gap-2`}>
                   <View style={tw`w-24 bg-gray-200 rounded-full h-2`}>
                     <View 
-                      style={tw`bg-red-500 rounded-full h-2`}
-                      style={{ width: `${(count / totalItems) * 100}%` }}
+                      style={[
+                        tw`bg-red-500 rounded-full h-2`,
+                        { width: `${(count / totalItems) * 100}%` }
+                      ]}
                     />
                   </View>
                   <Text style={tw`text-gray-600 text-sm font-bold`}>{count}</Text>
@@ -99,7 +102,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({ items, onBack }) => {
         <View style={tw`bg-white rounded-2xl p-6 shadow-xl`}>
           <Text style={tw`text-xl font-bold mb-4`}>Recent Activity</Text>
           <View style={tw`gap-3`}>
-            {mockLogs.slice(0, 5).map(log => {
+            {logs.slice(0, 5).map(log => {
               const item = items.find(i => i.id === log.itemId);
               return (
                 <View key={log.id} style={tw`flex-row items-center gap-3 py-2`}>
@@ -115,7 +118,7 @@ const AnalyticsScreen: React.FC<AnalyticsScreenProps> = ({ items, onBack }) => {
                 </View>
               );
             })}
-            {mockLogs.length === 0 && (
+            {logs.length === 0 && (
               <Text style={tw`text-gray-500 text-center py-4 italic`}>
                 No recent activity
               </Text>

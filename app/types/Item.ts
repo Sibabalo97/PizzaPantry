@@ -8,5 +8,5 @@ export type Item = {
   unit: string;
   reorderPoint: number;
   supplier?: string;
-  lastUpdated: number;
+  lastUpdated: string;
 };

@@ -18,7 +18,7 @@ export const api = {
       ...payload,
       id: 'i-' + Math.random().toString(36).slice(2,9),
       // Item.lastUpdated uses numerical timestamp (number)
-      lastUpdated: new Date().getTime() 
+      lastUpdated: new Date(Date.now() - 14400000).toISOString()
     };
     mockItems.push(newItem);
     return JSON.parse(JSON.stringify(newItem));
@@ -32,7 +32,7 @@ export const api = {
         ...mockItems[idx], 
         ...payload, 
         // Item.lastUpdated uses numerical timestamp (number)
-        lastUpdated: new Date().getTime() 
+        lastUpdated: new Date(Date.now() - 14400000).toISOString()
     };
     return JSON.parse(JSON.stringify(mockItems[idx]));
   },
@@ -64,7 +64,7 @@ export const api = {
     
     mockItems[idx].quantity = newQ;
     // Item.lastUpdated uses numerical timestamp (number)
-    mockItems[idx].lastUpdated = new Date().getTime(); 
+    mockItems[idx].lastUpdated = new Date(Date.now() - 14400000).toISOString();
 
     const log: AdjustmentLog = {
       id: 'log-' + Math.random().toString(36).slice(2,9),

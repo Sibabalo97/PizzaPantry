@@ -1,50 +1,101 @@
-# Welcome to your Expo app 👋
+PieStock - Mobile Inventory Management App
+Overview
+PieStock is a React Native mobile application designed for pizza shop inventory management. It provides real-time stock tracking, low-stock alerts, and inventory adjustment capabilities in a user-friendly mobile interface.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Architecture & Library Choices
+Core Architecture
+text
+src/
+├── components/          # Reusable UI components
+├── screens/            # Main app screens
+├── navigation/         # Tab and screen navigation  
+├── types/              # TypeScript type definitions
+├── data/               # Mock data and API services
+└── App.tsx             # Main application component
+Technology Stack
+React Native with Expo for cross-platform development
 
-## Get started
+TypeScript for type safety
 
-1. Install dependencies
+twrnc (Tailwind CSS) for styling
 
-   ```bash
-   npm install
-   ```
+Lucide React Native for icons
 
-2. Start the app
+React Hooks for state management
 
-   ```bash
-   npx expo start
-   ```
+Custom tab navigation
 
-In the output, you'll find options to open the app in a
+Design Decisions
+Mock Data First: Started with mock data for rapid prototyping with API interface ready for real backend
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Local State: Used React useState for simplicity at current complexity level
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Expo: Chosen for faster development cycle and easier deployment
 
-## Get a fresh project
+TypeScript: Implemented for better code quality and maintainability
 
-When you're ready, run:
+Setup & Run Instructions
+Prerequisites
+Node.js (v16 or higher)
 
-```bash
-npm run reset-project
-```
+npm or yarn
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Expo CLI
 
-## Learn more
+Installation
+Clone the repository
 
-To learn more about developing your project with Expo, look at the following resources:
+text
+git clone <repository-url>
+cd PizzaPantry 
+Install dependencies
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+text
+npm install
 
-## Join the community
+API Service Methods
 
-Join our community of developers creating universal apps.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+typescript
+// Items Management
+getItems(): Promise<Item[]>
+createItem(payload): Promise<Item>
+updateItem(id, payload): Promise<Item>
+deleteItem(id): Promise<void>
+
+// Inventory Adjustments
+adjustItem(itemId, type, amount, reason, user): Promise<{item, log}>
+
+// Logs & Analytics
+getLogsForItem(itemId): Promise<AdjustmentLog[]>
+getAllLogs(): Promise<AdjustmentLog[]>
+
+
+Key Design Decisions & Trade-offs
+1. Mock Data vs Real API
+Choice: Started with mock data for rapid prototyping
+
+Trade-off: Easy to develop but lacks persistence
+
+Solution: Built API service interface for easy transition to real backend
+
+2. Local State vs Global State
+Choice: React useState for component-level state
+
+Trade-off: Simpler but can become complex with scale
+
+Justification: App complexity doesn't yet require Redux/Context
+
+3. Expo vs Bare React Native
+Choice: Expo for faster development cycle
+
+Trade-off: Limited native module access
+
+Benefit: Quick prototyping and over-the-air updates
+
+4. TypeScript Adoption
+Choice: Full TypeScript implementation
+
+Trade-off: Steeper learning curve
+
+Benefit: Better code quality and maintainability

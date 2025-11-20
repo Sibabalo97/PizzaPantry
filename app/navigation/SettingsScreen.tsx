@@ -58,8 +58,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ user, onSignOut, onBack
                   notifications ? 'bg-red-600' : 'bg-gray-300'
                 } justify-center`}
               >
-                <View style={tw`w-4 h-4 bg-white rounded-full ml-1`} 
-                  style={notifications ? tw`ml-7` : tw`ml-1`}
+                <View 
+                  style={[
+                    tw`w-4 h-4 bg-white rounded-full`,
+                    notifications ? tw`ml-7` : tw`ml-1`
+                  ]}
                 />
               </TouchableOpacity>
             </View>
@@ -71,8 +74,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ user, onSignOut, onBack
                   lowStockAlerts ? 'bg-red-600' : 'bg-gray-300'
                 } justify-center`}
               >
-                <View style={tw`w-4 h-4 bg-white rounded-full ml-1`} 
-                  style={lowStockAlerts ? tw`ml-7` : tw`ml-1`}
+                <View 
+                  style={[
+                    tw`w-4 h-4 bg-white rounded-full`,
+                    lowStockAlerts ? tw`ml-7` : tw`ml-1`
+                  ]}
                 />
               </TouchableOpacity>
             </View>

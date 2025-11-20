@@ -9,7 +9,7 @@ export let mockItems: Item[] = [
     unit: 'lbs',
     reorderPoint: 20,
     supplier: 'Dairy Fresh Co.',
-    lastUpdated: new Date().getTime() 
+    lastUpdated: new Date(Date.now() - 14400000).toISOString()
   },
   {
     id: '2',
@@ -19,7 +19,7 @@ export let mockItems: Item[] = [
     unit: 'units',
     reorderPoint: 50,
     supplier: 'PackPro Inc.',
-    lastUpdated: new Date().getTime() 
+    lastUpdated: new Date(Date.now() - 14400000).toISOString()
   },
   {
     id: '3',
@@ -29,6 +29,6 @@ export let mockItems: Item[] = [
     unit: 'gallons',
     reorderPoint: 10,
     supplier: 'Fresh Tomato Inc.',
-    lastUpdated: new Date().getTime() 
+    lastUpdated: new Date(Date.now() - 14400000).toISOString()
   }
 ];

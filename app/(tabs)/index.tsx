@@ -17,6 +17,7 @@ import TabBar from '../../components/icons/TabBar';
 // Import types and data
 import { User } from '../types/User';
 import { Item } from '../types/Item';
+import { AdjustmentLog } from '../types/AdjustmentLog';
 import { USERS } from '../data/mockUsers';
 import { mockItems } from '../data/mockItems';
 import { mockLogs } from '../data/mockLogs';
@@ -29,7 +30,7 @@ const MobileApp: React.FC = () => {
   
   // Create mutable copies of the mock data
   const [items, setItems] = useState<Item[]>([...mockItems]);
-  const [allLogs, setAllLogs] = useState([...mockLogs]);
+  const [allLogs, setAllLogs] = useState<AdjustmentLog[]>([...mockLogs]);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -123,7 +124,7 @@ const MobileApp: React.FC = () => {
       return item;
     });
 
-    const newLog = {
+    const newLog: AdjustmentLog = {
       id: crypto.randomUUID(),
       itemId: selectedItem.id,
       type,
@@ -195,13 +196,30 @@ const MobileApp: React.FC = () => {
     // Tab-based screens
     switch (activeTab) {
       case 'analytics':
-        return <AnalyticsScreen items={items} onBack={() => setActiveTab('inventory')} />;
+        return (
+          <AnalyticsScreen 
+            items={items} 
+            logs={allLogs}
+            onBack={() => setActiveTab('inventory')} 
+          />
+        );
       
       case 'orders':
-        return <OrdersScreen orders={mockOrders} onBack={() => setActiveTab('inventory')} />;
+        return (
+          <OrdersScreen 
+            orders={mockOrders} 
+            onBack={() => setActiveTab('inventory')} 
+          />
+        );
       
       case 'settings':
-        return <SettingsScreen user={user!} onSignOut={handleSignOut} onBack={() => setActiveTab('inventory')} />;
+        return (
+          <SettingsScreen 
+            user={user!} 
+            onSignOut={handleSignOut} 
+            onBack={() => setActiveTab('inventory')} 
+          />
+        );
       
       case 'inventory':
       default:
